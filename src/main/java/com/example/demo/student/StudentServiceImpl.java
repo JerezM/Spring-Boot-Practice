@@ -25,10 +25,27 @@ public class StudentServiceImpl implements StudentService {
 
 
     @Override
-    public Student createStudent(Student student) {
-        Student createdStudent = studentRepository.save(student);
+    public Student addNewStudent(Student student) {
+        Student addedStudent = studentRepository.save(student);
 
-        return createdStudent;
+        return addedStudent;
     }
+
+    /*
+    @Override
+    public Student getStudentById(Long id) throws StudentNotFoundException {
+        Optional<Student> studentFinded = null;
+        try {
+            studentFinded = studentRepository.findById(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        if(!studentFinded.isPresent()) {
+            throw new StudentNotFoundException("The student with id: "+id+", were not found.");
+        }
+
+        return studentFinded.get();
+    }*/
     
 }

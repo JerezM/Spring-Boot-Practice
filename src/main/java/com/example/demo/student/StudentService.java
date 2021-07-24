@@ -11,9 +11,17 @@ public interface StudentService {
     public List<Student> getStudents();
 
     /**
+     * Get the student by his id.
+     * @param id must not be null.
+     * @return the student with the given id.
+     *
+    public Student getStudentById(Long id) throws StudentNotFoundException;
+    */
+
+    /**
      * Create a new student using the parameterized one.
-     * @param student Student that will be created.
-     * @return The student created.
+     * @param student must not had an id.
+     * @return The created student.
      */
-    public Student createStudent(Student student);
+    public Student addNewStudent(Student student);
 }
