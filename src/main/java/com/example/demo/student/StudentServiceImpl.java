@@ -1,6 +1,7 @@
 package com.example.demo.student;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,13 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public Student addNewStudent(Student student) {
+        Optional<Student> optionalStudent = studentRepository
+            .findStudentByEmail(student.getEmail());
+
+        if(optionalStudent.isPresent()) {
+            throw new IllegalStateException("email taken");
+        }    
+
         Student addedStudent = studentRepository.save(student);
 
         return addedStudent;
