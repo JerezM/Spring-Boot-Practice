@@ -24,4 +24,10 @@ public interface StudentService {
      * @return The created student.
      */
     public Student addNewStudent(Student student);
+
+    /**
+     * Delete the student by his id.
+     * @param studentId must not be null.
+     */
+    public void deleteStudentById(Long studentId);
 }

@@ -3,6 +3,7 @@ package com.example.demo.student;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,22 +25,27 @@ public class StudentController {
 
     @GetMapping
     public List<Student> getStudents() {
-        List<Student> studentList = studentService.getStudents();
+        List<Student> studentList = this.studentService.getStudents();
 
         return studentList;
     }
 
-    @GetMapping("/{id}")
-    public Student getStudentById(@PathVariable("id") Long id){
-        Student studentFinded = studentService.getStudentById(id);
+    @GetMapping("/{studentId}")
+    public Student getStudentById(@PathVariable("studentId") Long studentId){
+        Student studentFinded = this.studentService.getStudentById(studentId);
 
         return studentFinded;
     }
 
     @PostMapping
     public Student registerNewStudent(@RequestBody Student student){
-        Student registeredStudent = studentService.addNewStudent(student);
+        Student registeredStudent = this.studentService.addNewStudent(student);
 
         return registeredStudent;
+    }
+
+    @DeleteMapping("/{studentId}")
+    public void deletedStudentById(@PathVariable("studentId") Long studentId){
+        this.studentService.deleteStudentById(studentId);
     }
 }

@@ -19,7 +19,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public List<Student> getStudents() {
-        List<Student> studentList = studentRepository.findAll();
+        List<Student> studentList = this.studentRepository.findAll();
 
         return studentList;
     }
@@ -27,14 +27,14 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public Student addNewStudent(Student student) {
-        Optional<Student> optionalStudent = studentRepository
+        Optional<Student> optionalStudent = this.studentRepository
             .findStudentByEmail(student.getEmail());
 
         if(optionalStudent.isPresent()) {
             throw new IllegalStateException("email taken");
         }    
 
-        Student addedStudent = studentRepository.save(student);
+        Student addedStudent = this.studentRepository.save(student);
 
         return addedStudent;
     }
@@ -42,18 +42,32 @@ public class StudentServiceImpl implements StudentService {
     
     @Override
     public Student getStudentById(Long id){
-        Optional<Student> studentFinded = null;
+        Optional<Student> optionalStudent = null;
         try {
-            studentFinded = studentRepository.findById(id);
+            optionalStudent = this.studentRepository.findById(id);
         } catch (Exception e) {
             e.printStackTrace();
         }
         
-        if(!studentFinded.isPresent()) {
-            throw new IllegalStateException("student not founded");
+        if(!optionalStudent.isPresent()) {
+            throw new IllegalStateException("student with id: "+ id +" does not exist");
         }
 
-        return studentFinded.get();
+        Student studentFinded = optionalStudent.get();
+
+        return studentFinded;
+    }
+
+
+    @Override
+    public void deleteStudentById(Long studentId) {
+        boolean studentExist = this.studentRepository.existsById(studentId);
+
+        if(!studentExist) {
+            throw new IllegalStateException("student with id: "+ studentId +" does not exist");
+        }
+
+        studentRepository.deleteById(studentId);
     }
     
 }
