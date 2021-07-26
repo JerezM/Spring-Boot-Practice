@@ -39,9 +39,9 @@ public class StudentServiceImpl implements StudentService {
         return addedStudent;
     }
 
-    /*
+    
     @Override
-    public Student getStudentById(Long id) throws StudentNotFoundException {
+    public Student getStudentById(Long id){
         Optional<Student> studentFinded = null;
         try {
             studentFinded = studentRepository.findById(id);
@@ -50,10 +50,10 @@ public class StudentServiceImpl implements StudentService {
         }
         
         if(!studentFinded.isPresent()) {
-            throw new StudentNotFoundException("The student with id: "+id+", were not found.");
+            throw new IllegalStateException("student not founded");
         }
 
         return studentFinded.get();
-    }*/
+    }
     
 }

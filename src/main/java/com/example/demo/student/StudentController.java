@@ -29,12 +29,12 @@ public class StudentController {
         return studentList;
     }
 
-    /*@GetMapping("/{id}")
+    @GetMapping("/{id}")
     public Student getStudentById(@PathVariable("id") Long id){
         Student studentFinded = studentService.getStudentById(id);
 
         return studentFinded;
-    }*/
+    }
 
     @PostMapping
     public Student registerNewStudent(@RequestBody Student student){

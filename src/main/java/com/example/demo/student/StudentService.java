@@ -14,9 +14,9 @@ public interface StudentService {
      * Get the student by his id.
      * @param id must not be null.
      * @return the student with the given id.
-     *
-    public Student getStudentById(Long id) throws StudentNotFoundException;
-    */
+     */
+    public Student getStudentById(Long id);
+    
 
     /**
      * Create a new student using the parameterized one.
