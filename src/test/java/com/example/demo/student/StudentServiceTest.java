@@ -50,8 +50,7 @@ public class StudentServiceTest {
         verify(this.studentRepository).save(studentArgumentCaptor.capture());//The argumentCaptor capture the student used in the save method
         Student capturedStudent = studentArgumentCaptor.getValue();
 
-        assertThat(capturedStudent).isEqualTo(expectStudent);
-        
+        assertThat(capturedStudent).isEqualTo(expectStudent);        
     }
 
     @Test
@@ -74,8 +73,7 @@ public class StudentServiceTest {
                             .isInstanceOf(IllegalStateException.class)
                             .hasMessageContaining("email taken");
 
-        verify(this.studentRepository, never()).save(any());//this verify that the mock not used the method save in this case
-          
+        verify(this.studentRepository, never()).save(any());//this verify that the mock not used the method save in this case          
     }
 
     // ---- getStudents method test ----
@@ -134,17 +132,103 @@ public class StudentServiceTest {
 
     @Test
     void canUpdateStudentName() {
+        //given
+        Long id = 1L;
+        String studentName = "Juan";
+        String studentEmail = "juan@gmail.com";
+        Student student = new Student(studentName, studentEmail, LocalDate.now());
 
+        Optional<Student> studentOptional = Optional.of(student);
+
+        given(this.studentRepository.findById(id))
+            .willReturn(studentOptional);
+
+        String renovedStudentName = "Juan Gomez";
+
+        //when
+        this.studentServiceUnderTest.updateStudent(id, renovedStudentName, studentEmail);
+
+        //then
+        verify(this.studentRepository).findById(id);
+
+        assertThat(renovedStudentName).isNotNull();
+        assertThat(renovedStudentName).isNotEmpty();
+        assertThat(renovedStudentName).isNotEqualTo(studentName);
+
+        assertThat(renovedStudentName).isEqualTo(student.getName());
     }
 
     @Test
     void canUpdateStudentEmail() {
+        //given
+        Long id = 1L;
+        String studentName = "Juan";
+        String studentEmail = "juan@gmail.com";
+        Student student = new Student(studentName, studentEmail, LocalDate.now());
 
+        Optional<Student> studentOptional = Optional.of(student);
+
+        given(this.studentRepository.findById(id))
+            .willReturn(studentOptional);
+
+        String renovedStudentEmail = "juan-gomez@gmail.com";
+
+        given(this.studentRepository.existsStudentByEmail(renovedStudentEmail))
+            .willReturn(false);
+
+        //when
+        this.studentServiceUnderTest.updateStudent(id, studentName, renovedStudentEmail);
+
+        //then
+        verify(this.studentRepository).findById(id);
+
+        assertThat(renovedStudentEmail).isNotNull();
+        assertThat(renovedStudentEmail).isNotEmpty();
+        assertThat(renovedStudentEmail).isNotEqualTo(studentEmail);
+
+        verify(this.studentRepository).existsStudentByEmail(renovedStudentEmail);
+
+        assertThat(renovedStudentEmail).isEqualTo(student.getEmail());
     }
 
     @Test
     void canUpdateStudentNameAndEmail() {
+        //given
+        Long id = 1L;
+        String studentName = "Juan";
+        String studentEmail = "juan@gmail.com";
+        Student student = new Student(studentName, studentEmail, LocalDate.now());
 
+        Optional<Student> studentOptional = Optional.of(student);
+
+        given(this.studentRepository.findById(id))
+            .willReturn(studentOptional);
+
+        String renovedStudentName = "Juan Gomez";
+        String renovedStudentEmail = "juan-gomez@gmail.com";
+
+        given(this.studentRepository.existsStudentByEmail(renovedStudentEmail))
+            .willReturn(false);
+
+        //when
+        this.studentServiceUnderTest.updateStudent(id, renovedStudentName, renovedStudentEmail);
+
+        //then
+        verify(this.studentRepository).findById(id);
+
+        assertThat(renovedStudentName).isNotNull();
+        assertThat(renovedStudentName).isNotEmpty();
+        assertThat(renovedStudentName).isNotEqualTo(studentName);
+
+        assertThat(renovedStudentName).isEqualTo(student.getName());
+
+        assertThat(renovedStudentEmail).isNotNull();
+        assertThat(renovedStudentEmail).isNotEmpty();
+        assertThat(renovedStudentEmail).isNotEqualTo(studentEmail);
+
+        verify(this.studentRepository).existsStudentByEmail(renovedStudentEmail);
+
+        assertThat(renovedStudentEmail).isEqualTo(student.getEmail());
     }
 
     @Test
@@ -166,7 +250,6 @@ public class StudentServiceTest {
 
         verify(this.studentRepository).findById(wrongId);
         verify(this.studentRepository, never()).existsStudentByEmail(any());
-
     }
 
     @Test
@@ -198,7 +281,7 @@ public class StudentServiceTest {
 
         assertThat(renovedEmail).isNotNull();
         assertThat(renovedEmail).isNotEmpty();
-        assertThat(renovedEmail).isNotEqualTo(student.getEmail());
+        assertThat(renovedEmail).isNotEqualTo(email);
 
         verify(this.studentRepository).existsStudentByEmail(renovedEmail);
     }
