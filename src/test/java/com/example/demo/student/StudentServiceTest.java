@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -32,6 +31,8 @@ public class StudentServiceTest {
         this.studentServiceUnderTest = new StudentServiceImpl(this.studentRepository);
     }
 
+
+    // ---- addNewStudent method test ----
 
     @Test
     void canAddNewStudent() {
@@ -77,6 +78,8 @@ public class StudentServiceTest {
           
     }
 
+    // ---- getStudents method test ----
+
     @Test
     void canGetStudents() {
         //when
@@ -85,6 +88,8 @@ public class StudentServiceTest {
         //then
         verify(this.studentRepository).findAll();
     }
+
+    // ---- getStudentById method test ----
 
     @Test
     void canGetStudentById() {
@@ -108,7 +113,7 @@ public class StudentServiceTest {
     }
 
     @Test
-    void willThrowWhenIdIsNotFoundedUsingGetStudentById(){
+    void willThrowWhenIdIsNotFoundedUsingGetStudentById() {
         //given
         Long wrongId = 2L;
         Optional<Student> emptyStudentOptional = Optional.empty();
@@ -125,11 +130,80 @@ public class StudentServiceTest {
         verify(this.studentRepository).findById(wrongId);
     }
 
+    // ---- updateStudent method test ----
+
     @Test
-    @Disabled
-    void updateStudent() {
+    void canUpdateStudentName() {
 
     }
+
+    @Test
+    void canUpdateStudentEmail() {
+
+    }
+
+    @Test
+    void canUpdateStudentNameAndEmail() {
+
+    }
+
+    @Test
+    void willThrowWhenIdIsNotFoundedUsingUpdateStudent() {
+        //given
+        String name = "foo";
+        String email = "foo@gmail.com";
+        Long wrongId = 2L;
+        Optional<Student> emptyStudentOptional = Optional.empty();
+
+        given(this.studentRepository.findById(wrongId))
+            .willReturn(emptyStudentOptional);
+
+        //when
+        //then
+        assertThatThrownBy(() -> this.studentServiceUnderTest.updateStudent(wrongId, name, email))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("student with id: "+ wrongId +" does not exist");
+
+        verify(this.studentRepository).findById(wrongId);
+        verify(this.studentRepository, never()).existsStudentByEmail(any());
+
+    }
+
+    @Test
+    void willThrowWhenEmailIsTakenUsingUpdateStudent() {
+        //given
+        Long id = 1L;
+        String name = "Juan";
+        String email = "juan@gmail.com";
+        Student student = new Student(name, email, LocalDate.now());
+
+        Optional<Student> studentOptional = Optional.of(student);
+
+        given(this.studentRepository.findById(id))
+            .willReturn(studentOptional);   
+
+        String renovedEmail = "juan-new-email@gmail.com";
+
+        given(this.studentRepository.existsStudentByEmail(renovedEmail))
+            .willReturn(true);
+
+        //when
+        //then
+        assertThatThrownBy(() -> this.studentServiceUnderTest.updateStudent(id, name, renovedEmail))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("email taken");
+
+        assertThat(name).isEqualTo(student.getName());//in this case the name is equal to the current name 
+                                                      //and the name of the student is not updated
+
+        assertThat(renovedEmail).isNotNull();
+        assertThat(renovedEmail).isNotEmpty();
+        assertThat(renovedEmail).isNotEqualTo(student.getEmail());
+
+        verify(this.studentRepository).existsStudentByEmail(renovedEmail);
+    }
+
+    // ---- deleteStudentById method test ----
 
     @Test
     void canDeleteStudentById() {
