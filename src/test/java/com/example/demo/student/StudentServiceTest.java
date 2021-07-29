@@ -2,7 +2,6 @@ package com.example.demo.student;
 
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -133,8 +132,37 @@ public class StudentServiceTest {
     }
 
     @Test
-    @Disabled
-    void deleteStudentById() {
+    void canDeleteStudentById() {
+        //given
+        Long id = 1L;
 
+        given(this.studentRepository.existsById(id))
+            .willReturn(true);
+
+        //when
+        this.studentServiceUnderTest.deleteStudentById(id);
+
+        //then
+        verify(this.studentRepository).existsById(id);
+        verify(this.studentRepository).deleteById(id);
+    }
+
+    @Test
+    void willThrowWhenIdIsNotFoundedUsingDeleteStudentById() {
+        //given
+        Long id = 1L;
+
+        given(this.studentRepository.existsById(id))
+            .willReturn(false);
+
+        //when
+        //then
+        assertThatThrownBy(() -> this.studentServiceUnderTest.deleteStudentById(id))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("student with id: "+ id +" does not exist");
+
+        verify(this.studentRepository).existsById(id);
+
+        verify(this.studentRepository, never()).deleteById(any());
     }
 }
