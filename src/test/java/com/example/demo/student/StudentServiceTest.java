@@ -2,6 +2,7 @@ package com.example.demo.student;
 
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -87,9 +88,42 @@ public class StudentServiceTest {
     }
 
     @Test
-    @Disabled
-    void getStudentById() {
+    void canGetStudentById() {
+        //given
+        Long id = 1L;
+        Student student = new Student(id, "Juan", "juanperez73@gmail.com", LocalDate.of(1973, 3, 2));
+        Optional<Student> returnedStudentOptional = Optional.of(student);
 
+        given(this.studentRepository.findById(id)).willReturn(returnedStudentOptional);
+
+        //when
+        this.studentServiceUnderTest.getStudentById(id);
+
+        //then
+        ArgumentCaptor<Long> idArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+
+        verify(this.studentRepository).findById(idArgumentCaptor.capture());
+        Long idCaptured = idArgumentCaptor.getValue();
+
+        assertThat(idCaptured).isEqualTo(id);
+    }
+
+    @Test
+    void willThrowWhenIdIsNotFoundedUsingGetStudentById(){
+        //given
+        Long wrongId = 2L;
+        Optional<Student> emptyStudentOptional = Optional.empty();
+
+        given(this.studentRepository.findById(wrongId))
+            .willReturn(emptyStudentOptional);
+
+        //when
+        //then
+        assertThatThrownBy(() -> this.studentServiceUnderTest.getStudentById(wrongId))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("student with id: "+ wrongId +" does not exist");
+
+        verify(this.studentRepository).findById(wrongId);
     }
 
     @Test
