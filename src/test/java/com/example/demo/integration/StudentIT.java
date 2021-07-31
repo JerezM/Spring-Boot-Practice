@@ -85,9 +85,6 @@ public class StudentIT {
 
 		List<Student> expectedStudents = this.studentRepository.findAll();
 
-		System.out.println("expectedStudents: "+ expectedStudents);
-		System.out.println("\n\n obtainedStudents: "+ obtainedStudents);
-
 		assertThat(expectedStudents)
 			.hasSize(expectedStudents.size())
 			.usingFieldByFieldElementComparator()
@@ -164,6 +161,61 @@ public class StudentIT {
 		resultActions.andExpect(status().isOk());
 		List<Student> students = this.studentRepository.findAll();
 		assertThat(students).usingElementComparatorIgnoringFields("id").contains(student);
+	}
+
+	@Test
+	void canUpdateStudent() throws Exception {
+		// given
+        String name = String.format(
+            "%s %s",
+            faker.name().firstName(),
+            faker.name().lastName()
+        );
+
+        String email = String.format("%s@gmail.com", StringUtils.trimAllWhitespace(name.trim().toLowerCase()));
+
+        Student student = new Student(name, email, LocalDate.now());
+			
+		String pathRequestMapping = "/api/v1/students";
+
+        MvcResult postStudentResult =
+        	this.mockMvc.perform(
+				post(pathRequestMapping)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(this.objectMapper.writeValueAsString(student))
+			)
+			.andExpect(status().isOk())
+			.andReturn();
+
+        String contentAsString = postStudentResult.getResponse().getContentAsString();            						            						
+
+        Student obtainedStudent = 
+			this.objectMapper.readValue(
+            	contentAsString,
+            	new TypeReference<>() {}
+        	);
+
+        long id = obtainedStudent.getId();                                             
+
+        // when
+		String expectedName = "expectedName";
+		String expectedEmail = "expectedName@gmail.com";
+
+        ResultActions resultActions = 
+			this.mockMvc.perform(
+				put(pathRequestMapping + "/" + id)
+					.param("name", expectedName)
+					.param("email", expectedEmail)
+			);
+
+        // then
+        resultActions.andExpect(status().isOk());
+		Student getStudentByIdResult = this.studentRepository.getById(id);
+		String obtainedName = getStudentByIdResult.getName();
+		String obtainedEmail = getStudentByIdResult.getEmail();
+
+		assertThat(expectedName).isEqualTo(obtainedName);
+		assertThat(expectedEmail).isEqualTo(obtainedEmail);
 	}
 
 	@Test
