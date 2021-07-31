@@ -50,29 +50,67 @@ public class StudentIT {
 			faker.name().lastName()
 		);
 
-		String email = String.format("%s@gmail.com",
-							StringUtils.trimAllWhitespace(name.trim().toLowerCase()));
+		String email = String.format("%s@gmail.com", StringUtils.trimAllWhitespace(name.trim().toLowerCase()));
 
-		Student student = new Student(
-			name,
-			email,
-			LocalDate.now()
-		);
+		Student student = new Student(name, email, LocalDate.now());
 		
 		String pathRequestMapping = "/api/v1/students";
 
 		// when
-		ResultActions resultActions = this.mockMvc
-			.perform(post(pathRequestMapping)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(this.objectMapper.writeValueAsString(student))
-			)
-		;
+		ResultActions resultActions = 
+			this.mockMvc.perform(
+				post(pathRequestMapping)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(this.objectMapper.writeValueAsString(student))
+			);
 			
 		// then
 		resultActions.andExpect(status().isOk());
 		List<Student> students = this.studentRepository.findAll();
 		assertThat(students).usingElementComparatorIgnoringFields("id").contains(student);
+	}
+
+	@Test
+	void canGetStudentById() throws Exception {
+		// given
+        String name = String.format(
+            "%s %s",
+            faker.name().firstName(),
+            faker.name().lastName()
+        );
+
+        String email = String.format("%s@gmail.com", StringUtils.trimAllWhitespace(name.trim().toLowerCase()));
+
+        Student student = new Student(name, email, LocalDate.now());
+
+		String pathRequestMapping = "/api/v1/students";
+
+		MvcResult getStudentResult =
+        	this.mockMvc.perform(
+				post(pathRequestMapping)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(this.objectMapper.writeValueAsString(student))
+			)
+			.andExpect(status().isOk())
+			.andReturn();
+
+        String contentAsString = getStudentResult.getResponse().getContentAsString();            						            						
+
+        Student obtainedStudent = 
+			this.objectMapper.readValue(
+            	contentAsString,
+            	new TypeReference<>() {}
+        	);
+
+        long id = obtainedStudent.getId();
+
+        // when
+        ResultActions resultActions = this.mockMvc.perform(get(pathRequestMapping + "/" + id));
+
+        // then
+        resultActions.andExpect(status().isOk());
+		boolean existsStudent = this.studentRepository.existsById(id);
+        assertThat(existsStudent).isTrue();
 	}
 
 	@Test
@@ -84,48 +122,33 @@ public class StudentIT {
             faker.name().lastName()
         );
 
-        String email = String.format("%s@gmail.com",
-                StringUtils.trimAllWhitespace(name.trim().toLowerCase()));
+        String email = String.format("%s@gmail.com", StringUtils.trimAllWhitespace(name.trim().toLowerCase()));
 
-        Student student = new Student(
-                name,
-                email,
-                LocalDate.now()
-        );
-
+        Student student = new Student(name, email, LocalDate.now());
+			
 		String pathRequestMapping = "/api/v1/students";
 
-        this.mockMvc.perform(post(pathRequestMapping)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(this.objectMapper.writeValueAsString(student)))
-                .andExpect(status().isOk());
+        MvcResult getStudentResult =
+        	this.mockMvc.perform(
+				post(pathRequestMapping)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(this.objectMapper.writeValueAsString(student))
+			)
+			.andExpect(status().isOk())
+			.andReturn();
 
-        MvcResult getStudentsResult = this.mockMvc.perform(get(pathRequestMapping)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
+        String contentAsString = getStudentResult.getResponse().getContentAsString();            						            						
 
-        String contentAsString = getStudentsResult
-                .getResponse()
-                .getContentAsString();
+        Student obtainedStudent = 
+			this.objectMapper.readValue(
+            	contentAsString,
+            	new TypeReference<>() {}
+        	);
 
-        List<Student> students = this.objectMapper.readValue(
-                contentAsString,
-                new TypeReference<>() {
-                }
-        );
-
-        long id = students.stream()
-                .filter(s -> s.getEmail().equals(student.getEmail()))
-                .map(Student::getId)
-                .findFirst()
-                .orElseThrow(() ->
-                        new IllegalStateException(
-                                "student with email: " + email + " not found"));
+        long id = obtainedStudent.getId();                                             
 
         // when
-        ResultActions resultActions = this.mockMvc
-                .perform(delete(pathRequestMapping +"/" + id));
+        ResultActions resultActions = this.mockMvc.perform(delete(pathRequestMapping + "/" + id));
 
         // then
         resultActions.andExpect(status().isOk());
